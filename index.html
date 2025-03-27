@@ -3,15 +3,93 @@
   <head>
     <title>Submit Leads</title>
     <style>
-      body { font-family: Arial; padding: 40px; }
-      input, button { padding: 10px; font-size: 16px; margin-top: 10px; width: 100%; max-width: 400px; }
+      body {
+        font-family: Arial;
+        padding: 40px;
+        background: #f9f9f9;
+        text-align: center;
+      }
+      h2 {
+        color: #333;
+      }
+      input {
+        padding: 12px;
+        width: 80%;
+        max-width: 500px;
+        font-size: 16px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      button {
+        padding: 12px 20px;
+        font-size: 16px;
+        background: #0070f3;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        margin-top: 20px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #005ee2;
+      }
+      #status {
+        margin-top: 30px;
+        font-size: 16px;
+      }
     </style>
   </head>
   <body>
     <h2>📝 Submit Your Google Sheet</h2>
-    <form action="https://ni089.app.n8n.cloud/webhook/768f6d93-c7da-4f78-9a20-db7d6137109a" method="POST">
-      <input type="text" name="sheetUrl" placeholder="Paste your Google Sheet URL here" required />
+
+    <form id="sheetForm">
+      <input
+        type="text"
+        id="sheetUrl"
+        name="sheetUrl"
+        placeholder="Paste your Google Sheet URL here"
+        required
+      />
+      <br />
       <button type="submit">Submit</button>
     </form>
+
+    <div id="status"></div>
+
+    <script>
+      const form = document.getElementById("sheetForm");
+      const statusDiv = document.getElementById("status");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const sheetUrl = document.getElementById("sheetUrl").value;
+        const webhookUrl = "https://YOUR-N8N-URL/webhook/public-leads"; // replace this with your webhook
+
+        statusDiv.textContent = "Sending...";
+
+        try {
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ sheetUrl }),
+          });
+
+          const now = new Date().toLocaleString();
+
+          if (response.ok) {
+            statusDiv.innerHTML = `✅ <b>Success!</b> Message sent at <b>${now}</b>.<br>Waiting for client response...`;
+          } else {
+            statusDiv.innerHTML = `❌ <b>Failed</b> to send. (${response.status})<br><small>${now}</small>`;
+          }
+        } catch (error) {
+          const now = new Date().toLocaleString();
+          statusDiv.innerHTML = `❌ <b>Error:</b> ${error.message}<br><small>${now}</small>`;
+        }
+      });
+    </script>
   </body>
 </html>
+
